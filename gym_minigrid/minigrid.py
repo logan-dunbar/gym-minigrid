@@ -119,7 +119,7 @@ class WorldObj:
         obj_type = IDX_TO_OBJECT[type_idx]
         color = IDX_TO_COLOR[color_idx]
 
-        if obj_type == 'empty' or obj_type == 'unseen':
+        if obj_type == 'empty' or obj_type == 'agent' or obj_type == 'unseen':
             return None
 
         # State, 0: open, 1: closed, 2: locked
@@ -633,11 +633,11 @@ class MiniGridEnv(gym.Env):
         forward = 2
 
         # Pick up an object
-        pickup = 3
+        pickup = 5
         # Drop an object
         drop = 4
         # Toggle/activate an object
-        toggle = 5
+        toggle = 3
 
         # Done completing task
         done = 6
@@ -1155,12 +1155,16 @@ class MiniGridEnv(gym.Env):
         else:
             assert False, "unknown action"
 
+        # TODO: make a pull request for minigrid to use the TimeLimit wrapper
+        # https://github.com/openai/gym/issues/1230
+        info = {}
         if self.step_count >= self.max_steps:
+            info['TimeLimit.truncated'] = not done
             done = True
 
         obs = self.gen_obs()
 
-        return obs, reward, done, {}
+        return obs, reward, done, info
 
     def gen_obs_grid(self):
         """
